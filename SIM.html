@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DB HiTek | Operator Simulator</title>
+<style>
+:root{
+  --bg:#0b1220;--panel:#111c2f;--panel2:#17243a;--line:#26364e;
+  --text:#e8eef8;--muted:#9aaac2;--accent:#42d3c8;--blue:#72a7ff;
+  --good:#43d19e;--bad:#ff7885;--warn:#f5c66a;--shadow:0 16px 40px #0003;
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 80% 0%,#183052 0,transparent 35%),var(--bg);color:var(--text);font-family:Inter,"Noto Sans KR",system-ui,-apple-system,sans-serif;line-height:1.6}
+button{font:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+a{color:inherit;text-decoration:none}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:17px clamp(16px,4vw,48px);border-bottom:1px solid var(--line);background:#0b1220e8;position:sticky;top:0;z-index:5;backdrop-filter:blur(12px)}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:.02em}
+.brandmark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--blue));color:#081522;font-weight:900}
+.brand small{display:block;color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.12em}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);border-radius:11px;background:var(--panel2);color:var(--text);padding:9px 13px;font-weight:700;transition:.18s}
+.btn:hover{border-color:var(--accent);transform:translateY(-1px)}
+.btn.primary{background:var(--accent);color:#06201f;border-color:transparent}
+.btn.ghost{background:transparent}
+.wrap{width:min(1180px,calc(100% - 32px));margin:30px auto 60px}
+.hero{display:grid;grid-template-columns:1.5fr .8fr;gap:20px;align-items:stretch;margin-bottom:22px}
+.hero-main,.hero-side,.card{background:linear-gradient(145deg,#142239,#101a2b);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}
+.hero-main{padding:clamp(22px,4vw,38px);position:relative;overflow:hidden}
+.hero-main:after{content:"";position:absolute;width:230px;height:230px;border:1px solid #42d3c82b;border-radius:50%;right:-70px;bottom:-120px;box-shadow:0 0 0 28px #42d3c810,0 0 0 58px #42d3c808}
+.eyebrow{color:var(--accent);font-size:12px;letter-spacing:.15em;font-weight:900;text-transform:uppercase}
+h1{font-size:clamp(27px,4vw,43px);line-height:1.18;letter-spacing:-.04em;margin:12px 0}
+.hero p{color:var(--muted);max-width:670px;margin:0}
+.hero-side{padding:22px;display:flex;flex-direction:column;justify-content:space-between;gap:18px}
+.side-label{font-size:12px;color:var(--muted);font-weight:800;letter-spacing:.1em}
+.big-number{font-size:38px;font-weight:900;letter-spacing:-.04em}
+.mini-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.mini-stat{background:#0a1423;border:1px solid var(--line);border-radius:13px;padding:13px}
+.mini-stat strong{display:block;font-size:22px}
+.mini-stat span{font-size:12px;color:var(--muted)}
+.progress{height:8px;border-radius:20px;background:#26364e;overflow:hidden;margin-top:8px}
+.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--blue));width:0%;transition:width .25s}
+.layout{display:grid;grid-template-columns:270px minmax(0,1fr);gap:20px;align-items:start}
+.card{padding:22px}
+.section-title{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:15px}
+.section-title h2{font-size:19px;margin:0;letter-spacing:-.02em}
+.section-title p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:30px;background:#1c3145;color:var(--accent);font-size:11px;font-weight:900;white-space:nowrap}
+.scenario-list{display:grid;gap:9px}
+.scenario-btn{width:100%;text-align:left;display:flex;gap:12px;align-items:center;padding:13px;background:#0c1727;border:1px solid var(--line);border-radius:13px;color:var(--text)}
+.scenario-btn:hover{border-color:var(--blue)}
+.scenario-btn.active{border-color:var(--accent);background:#14313a}
+.scenario-icon{width:38px;height:38px;flex:0 0 38px;border-radius:11px;display:grid;place-items:center;background:#1b2b42;font-size:19px}
+.scenario-btn strong{display:block;font-size:13px}
+.scenario-btn small{color:var(--muted);font-size:11px}
+.side-note{font-size:12px;color:var(--muted);margin-top:16px;padding-top:15px;border-top:1px solid var(--line)}
+.main-column{display:grid;gap:20px;min-width:0}
+.case-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
+.case-head h2{font-size:24px;line-height:1.3;margin:8px 0}
+.case-head p{color:var(--muted);margin:0}
+.status{display:inline-flex;align-items:center;gap:7px;color:var(--warn);font-size:12px;font-weight:800}
+.dot{width:8px;height:8px;background:currentColor;border-radius:50%;box-shadow:0 0 12px currentColor}
+.machine{margin:20px 0;background:linear-gradient(130deg,#0a1525,#122641);border:1px solid #2c4563;border-radius:16px;padding:18px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.machine-visual{min-height:140px;display:grid;place-items:center;position:relative;overflow:hidden;border-radius:12px;background:radial-gradient(circle,#1d4160 0,#10253d 55%,#0a1728 100%)}
+.wafer{width:110px;aspect-ratio:1;border-radius:50%;border:2px solid #a4d8ee;background:repeating-radial-gradient(circle at 45% 40%,#467e9e 0 2px,#23516f 3px 5px,#173951 6px 8px);box-shadow:0 0 25px #42d3c855,inset 0 0 20px #d8f5ff55;position:relative}
+.wafer:after{content:"";position:absolute;bottom:-2px;left:45%;width:10%;height:4px;background:#10253d}
+.machine-visual.alert .wafer{box-shadow:0 0 30px #ff788566,inset 0 0 20px #ffd8dc55;border-color:var(--bad)}
+.machine-readings{display:grid;gap:8px;align-content:center}
+.reading{display:flex;justify-content:space-between;gap:10px;padding:9px 11px;background:#0b1727;border:1px solid #22354d;border-radius:9px;font-size:12px}
+.reading span{color:var(--muted)}
+.reading strong{font-variant-numeric:tabular-nums}
+.situation{padding:15px 16px;border-left:3px solid var(--warn);background:#f5c66a0b;border-radius:0 12px 12px 0;margin-bottom:18px}
+.situation strong{display:block;margin-bottom:4px}
+.situation p{margin:0;color:#c3cfe0;font-size:14px}
+.choices{display:grid;gap:10px}
+.choice{display:flex;align-items:flex-start;gap:12px;width:100%;padding:14px 15px;text-align:left;border:1px solid var(--line);border-radius:13px;background:#0c1727;color:var(--text);transition:.18s}
+.choice:hover:not(:disabled){border-color:var(--blue);background:#12253c}
+.choice:disabled{cursor:default;opacity:1}
+.choice .letter{display:grid;place-items:center;flex:0 0 28px;height:28px;border:1px solid #334761;border-radius:8px;color:var(--blue);font-size:12px;font-weight:900}
+.choice .choice-text{font-size:14px}
+.choice.correct{border-color:var(--good);background:#10352e}
+.choice.correct .letter{background:var(--good);color:#05251c;border-color:transparent}
+.choice.wrong{border-color:var(--bad);background:#351d2a}
+.choice.wrong .letter{background:var(--bad);color:#2a0810;border-color:transparent}
+.feedback{display:none;margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:13px;background:#0b1727}
+.feedback.show{display:block}
+.feedback.good{border-color:#27795e}
+.feedback.bad{border-color:#88404a}
+.feedback h3{margin:0 0 5px;font-size:16px}
+.feedback p{margin:0;color:#c5d2e5;font-size:13px}
+.feedback .principle{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--accent)}
+.controls{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:18px}
+.small-muted{font-size:12px;color:var(--muted)}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.metric{background:#0b1727;border:1px solid var(--line);border-radius:13px;padding:14px}
+.metric span{font-size:12px;color:var(--muted)}
+.metric strong{display:block;font-size:23px;margin-top:3px}
+.log{display:grid;gap:9px}
+.log-item{display:flex;gap:10px;align-items:flex-start;font-size:12px;color:#c4d1e2}
+.log-icon{width:24px;height:24px;flex:0 0 24px;border-radius:8px;display:grid;place-items:center;background:#1a2d43}
+.notice{font-size:12px;color:var(--muted);padding:14px 16px;border:1px dashed #40516a;border-radius:12px}
+.footer{margin-top:22px;text-align:center;color:#7e91ad;font-size:11px}
+.hidden{display:none!important}
+@media(max-width:850px){.hero{grid-template-columns:1fr}.layout{grid-template-columns:1fr}.scenario-list{grid-template-columns:repeat(2,minmax(0,1fr))}.side-note{margin-top:12px}.machine{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.topbar{align-items:flex-start}.brand{font-size:13px}.top-actions .btn{font-size:12px;padding:8px}.wrap{width:min(100% - 22px,1180px);margin-top:16px}.hero-side{padding:17px}.card{padding:16px}.scenario-list{grid-template-columns:1fr}.machine{grid-template-columns:1fr}.machine-visual{min-height:125px}.metrics{grid-template-columns:1fr}.case-head{display:block}.case-head .pill{margin-top:10px}.controls .btn{flex:1}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="UI.html" target="_top" title="메인 대시보드로 돌아가기">
+    <span class="brandmark">DB</span>
+    <span>OPERATOR INSIGHT<small>SEMICONDUCTOR TRAINING LAB</small></span>
+  </a>
+  <div class="top-actions">
+    <a class="btn ghost" href="UI.html" target="_top">← 메인 대시보드</a>
+    <button class="btn" id="resetBtn" type="button">기록 초기화</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="hero-main">
+      <div class="eyebrow">FIELD DECISION SIMULATOR</div>
+      <h1>상황을 읽고,<br>절차에 따라 판단하자.</h1>
+      <p>장비 알람·웨이퍼 이상·안전 상황을 가정한 교육용 시뮬레이터입니다. 선택한 대응에 따라 점수와 해설을 확인할 수 있습니다.</p>
+    </div>
+    <aside class="hero-side">
+      <div>
+        <div class="side-label">이번 세션 진행률</div>
+        <div class="big-number"><span id="progressText">0</span><span style="font-size:18px;color:var(--muted)"> / 5</span></div>
+        <div class="progress"><span id="progressBar"></span></div>
+      </div>
+      <div class="mini-stats">
+        <div class="mini-stat"><strong id="scoreTop">0</strong><span>누적 점수</span></div>
+        <div class="mini-stat"><strong id="accuracyTop">—</strong><span>정답률</span></div>
+      </div>
+    </aside>
+  </section>
+
+  <section class="layout">
+    <aside class="card">
+      <div class="section-title">
+        <div><h2>훈련 시나리오</h2><p>원하는 상황을 선택하세요.</p></div>
+        <span class="pill">5 CASES</span>
+      </div>
+      <div class="scenario-list" id="scenarioList"></div>
+      <div class="side-note">시나리오는 반도체 제조 현장 업무를 이해하기 위한 가상 교육 콘텐츠입니다. 실제 설비의 알람 코드·수치·조작 절차를 의미하지 않습니다.</div>
+    </aside>
+
+    <div class="main-column">
+      <section class="card" aria-live="polite">
+        <div class="case-head">
+          <div>
+            <div class="eyebrow" id="caseEyebrow">CASE 01 · EQUIPMENT</div>
+            <h2 id="caseTitle">장비 알람 발생</h2>
+            <p id="caseSubtitle">상황을 읽고 가장 적절한 대응을 선택하세요.</p>
+          </div>
+          <span class="pill" id="caseCategory">장비 대응</span>
+        </div>
+
+        <div class="machine">
+          <div class="machine-visual" id="machineVisual"><div class="wafer" aria-label="가상 웨이퍼 시각화"></div></div>
+          <div class="machine-readings">
+            <div class="reading"><span>설비 상태</span><strong id="readingStatus">ALARM</strong></div>
+            <div class="reading"><span>작업 상태</span><strong id="readingLot">HOLD 확인 필요</strong></div>
+            <div class="reading"><span>우선 원칙</span><strong id="readingRule">안전·절차</strong></div>
+          </div>
+        </div>
+
+        <div class="situation">
+          <strong id="situationHeading">상황 보고</strong>
+          <p id="situationText"></p>
+        </div>
+
+        <div class="section-title">
+          <div><h2>어떻게 대응하시겠습니까?</h2><p>한 가지 답변을 선택하면 해설이 표시됩니다.</p></div>
+        </div>
+        <div class="choices" id="choices"></div>
+
+        <div class="feedback" id="feedback" role="status">
+          <h3 id="feedbackTitle"></h3>
+          <p id="feedbackText"></p>
+          <div class="principle" id="feedbackPrinciple"></div>
+        </div>
+
+        <div class="controls">
+          <span class="small-muted" id="answerStatus">아직 답변하지 않았습니다.</span>
+          <div style="display:flex;gap:8px">
+            <button class="btn" id="retryBtn" type="button">다시 풀기</button>
+            <button class="btn primary" id="nextBtn" type="button">다음 시나리오 →</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-title"><div><h2>훈련 성과</h2><p>이 브라우저에 저장된 시뮬레이터 기록입니다.</p></div><span class="pill">LOCAL RECORD</span></div>
+        <div class="metrics">
+          <div class="metric"><span>답변한 문제</span><strong id="answeredMetric">0 / 5</strong></div>
+          <div class="metric"><span>획득 점수</span><strong id="scoreMetric">0점</strong></div>
+          <div class="metric"><span>정답률</span><strong id="accuracyMetric">—</strong></div>
+        </div>
+        <div style="height:17px"></div>
+        <div class="section-title"><div><h2>최근 학습 기록</h2><p>답변 결과가 여기에 표시됩니다.</p></div></div>
+        <div class="log" id="historyLog"><div class="small-muted">아직 기록이 없습니다. 첫 시나리오에 답해 보세요.</div></div>
+      </section>
+      <div class="notice">안전 안내: 실제 현장에서는 사내 표준작업절차(SOP), 안전 규정, 장비 매뉴얼 및 담당자 지시를 우선하세요. 위험 상황에서 임의로 설비를 조작하거나 인터록을 우회하지 마세요.</div>
+    </div>
+  </section>
+  <footer class="footer">DB HiTek Operator Insight · 개인 학습용 데모 · 실제 DB하이텍의 공식 교육 시스템이 아닙니다.</footer>
+</main>
+
+<script>
+"use strict";
+
+const scenarios = [
+  {
+    id:"alarm", icon:"⚙️", type:"EQUIPMENT", category:"장비 대응",
+    title:"장비 알람 발생", subtitle:"장비 상태를 확인하고 보고 순서를 판단하세요.",
+    status:"ALARM", lot:"상태 확인 필요", rule:"안전·절차",
+    heading:"상황 보고",
+    situation:"작업 중 장비에서 알람이 표시되고 공정 진행이 멈췄습니다. 원인은 아직 확인되지 않았으며, 주변에 다른 작업자가 있습니다.",
+    options:[
+      {text:"알람 내용을 확인하고 현장 절차에 따라 안전 상태를 확보한 뒤 담당자에게 보고한다.",correct:true,why:"정확한 알람과 현재 상태를 확인하고, 승인된 절차와 보고 체계를 따르는 것이 우선입니다.",principle:"핵심 원칙: 안전 확보 → 상태 확인 → 표준 절차 및 보고"},
+      {text:"생산 지연을 줄이기 위해 알람을 무시하고 작업을 다시 시작한다.",correct:false,why:"원인이 확인되지 않은 상태에서 작업을 재개하면 설비·제품·작업자 안전에 영향을 줄 수 있습니다.",principle:"알람을 임의로 무시하거나 원인을 추측해 재가동하지 않습니다."},
+      {text:"원인을 잘 모르지만 여러 버튼을 눌러 알람을 해제해 본다.",correct:false,why:"승인되지 않은 조작은 상태를 악화시키거나 문제 원인 파악을 어렵게 만들 수 있습니다.",principle:"교육받지 않은 조작은 피하고, 정해진 절차와 담당자 지시를 따릅니다."}
+    ]
+  },
+  {
+    id:"wafer", icon:"💿", type:"QUALITY", category:"품질 이상",
+    title:"웨이퍼 이상 징후", subtitle:"품질 이상을 발견했을 때의 기본 대응을 판단하세요.",
+    status:"CHECK", lot:"품질 확인 필요", rule:"혼입 방지",
+    heading:"상황 보고",
+    situation:"육안 확인 과정에서 웨이퍼 표면에 평소와 다른 흔적이 보입니다. 해당 제품이 정상인지 판단할 기준은 아직 확인하지 못했습니다.",
+    options:[
+      {text:"정상 제품으로 간주해 다음 공정으로 바로 넘긴다.",correct:false,why:"확인되지 않은 이상 제품을 다음 공정으로 넘기면 불량 확산과 추적성 저하로 이어질 수 있습니다.",principle:"불확실한 품질 상태는 정상으로 단정하지 않습니다."},
+      {text:"정해진 절차에 따라 제품 식별·상태를 보전하고, 임의 이동을 피한 뒤 품질 담당자에게 보고한다.",correct:true,why:"제품과 로트의 추적성을 유지하고, 승인된 기준에 따라 판정받는 접근입니다.",principle:"핵심 원칙: 식별·추적성 유지 → 임의 처리 금지 → 보고 및 판정"},
+      {text:"개인 판단으로 표면을 닦아 흔적이 사라지는지 확인한다.",correct:false,why:"임의 접촉이나 세척은 제품을 손상시키거나 원래 상태를 바꿀 수 있습니다.",principle:"웨이퍼에 임의로 손대거나 세척·수리하지 않습니다."}
+    ]
+  },
+  {
+    id:"ppe", icon:"🥽", type:"SAFETY", category:"안전·보호구",
+    title:"보호구 착용 확인", subtitle:"작업 전 안전 기준을 판단하세요.",
+    status:"PRE-CHECK", lot:"작업 전", rule:"보호구·교육",
+    heading:"상황 보고",
+    situation:"작업 구역에 들어가기 직전, 필요한 보호구 중 하나가 제대로 착용되지 않은 것을 발견했습니다. 동료는 잠깐이면 괜찮다며 먼저 들어가자고 합니다.",
+    options:[
+      {text:"작업을 시작하기 전에 출입·작업 기준에 맞게 보호구를 바로잡고, 필요하면 담당자에게 확인한다.",correct:true,why:"작업 전 보호구 확인은 기본적인 위험 예방 단계이며, 기준 충족 전에는 작업을 시작하지 않아야 합니다.",principle:"핵심 원칙: 작업 전 안전 조건 확인, 미충족 시 작업 보류"},
+      {text:"작업 시간이 짧으니 보호구 없이 먼저 들어간다.",correct:false,why:"짧은 작업이라도 노출 위험이 없어지는 것은 아닙니다.",principle:"시간이 짧다는 이유로 안전 기준을 생략하지 않습니다."},
+      {text:"동료가 괜찮다고 했으므로 보호구 상태를 더 확인하지 않는다.",correct:false,why:"동료의 의견이 공식 안전 기준을 대신할 수는 없습니다.",principle:"현장 규정과 교육된 기준을 우선합니다."}
+    ]
+  },
+  {
+    id:"handover", icon:"📝", type:"HANDOVER", category:"교대 인수인계",
+    title:"교대 인수인계", subtitle:"작업 상태와 미해결 사항을 어떻게 전달할까요?",
+    status:"HANDOVER", lot:"진행 중 작업", rule:"정확한 기록",
+    heading:"상황 보고",
+    situation:"교대 시간이 되었고 작업 중인 로트가 있습니다. 장비에서 잠깐 나타났다가 사라진 이상 알림도 있었지만, 아직 원인 확인이 끝나지 않았습니다.",
+    options:[
+      {text:"시간이 없으니 다음 근무자에게 구두로 '문제 없음'이라고만 전달한다.",correct:false,why:"미해결 알림을 누락하면 다음 근무자가 위험이나 품질 이슈를 알지 못한 채 작업할 수 있습니다.",principle:"미해결 사항은 완료된 문제처럼 표현하지 않습니다."},
+      {text:"작업 상태, 확인된 사실, 미해결 알림, 조치 및 보고 여부를 정해진 양식에 기록하고 인계한다.",correct:true,why:"객관적인 기록과 명확한 인계는 작업 연속성, 안전, 품질 추적성에 중요합니다.",principle:"핵심 원칙: 사실 기반 기록 → 미해결 사항 명시 → 인수 확인"},
+      {text:"알림은 사라졌으므로 기록할 필요 없이 개인 기억에 맡긴다.",correct:false,why:"알림이 사라졌다는 사실만으로 원인이 해결됐다고 볼 수 없으며, 기억에만 의존하면 정보가 누락될 수 있습니다.",principle:"이상 징후와 조치 결과는 규정에 따라 기록합니다."}
+    ]
+  },
+  {
+    id:"abnormal", icon:"🚨", type:"ABNORMAL", category:"이상 상황",
+    title:"이상 상황 및 위험 징후", subtitle:"안전이 우려되는 상황에서 우선순위를 판단하세요.",
+    status:"ATTENTION", lot:"상태 확인 필요", rule:"인명 안전",
+    heading:"상황 보고",
+    situation:"작업 중 평소와 다른 냄새와 소리가 느껴집니다. 원인을 알 수 없고 주변 작업자도 이를 알아차렸습니다.",
+    options:[
+      {text:"생산에 영향이 없도록 일단 작업을 계속하며 원인을 찾아본다.",correct:false,why:"원인을 알 수 없는 이상 징후를 무시하고 작업하면 위험이 커질 수 있습니다.",principle:"생산 목표보다 사람의 안전과 승인된 비상 절차가 우선입니다."},
+      {text:"위험을 피하고 현장 비상·보고 절차에 따라 주변에 알린 뒤 담당자의 지시를 따른다. 직접 조작은 교육·승인된 경우에만 한다.",correct:true,why:"위험 가능성이 있는 상황에서는 안전한 위치와 현장 비상 절차를 우선하고, 보고 체계에 따라 대응해야 합니다.",principle:"핵심 원칙: 인명 안전 → 비상 절차·보고 → 승인된 대응"},
+      {text:"원인을 확인하려고 장비 가까이 다가가 덮개를 열어본다.",correct:false,why:"교육과 권한 없이 장비에 접근하거나 덮개를 여는 행동은 추가 위험을 만들 수 있습니다.",principle:"위험 원인을 직접 조사하려고 무단 접근하거나 장비를 열지 않습니다."}
+    ]
+  }
+];
+
+const STORAGE_KEY = "dbhi_operator_simulator_v1";
+let currentIndex = 0;
+let answers = {};
+let currentAnswered = false;
+
+const $ = (id) => document.getElementById(id);
+const scenarioList = $("scenarioList");
+
+function loadProgress(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    answers = saved && typeof saved.answers === "object" && saved.answers ? saved.answers : {};
+  }catch(error){ answers = {}; }
+}
+function saveProgress(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify({answers})); }catch(error){ /* 저장이 차단되어도 학습은 계속 */ }
+}
+function answeredCount(){ return Object.keys(answers).length; }
+function scoreTotal(){ return Object.values(answers).reduce((sum,item)=>sum+(item.correct?20:0),0); }
+function accuracy(){
+  const count = answeredCount();
+  if(!count) return "—";
+  const correct = Object.values(answers).filter(item=>item.correct).length;
+  return Math.round(correct/count*100)+"%";
+}
+function renderScenarioList(){
+  scenarioList.innerHTML = "";
+  scenarios.forEach((scenario,index)=>{
+    const result = answers[scenario.id];
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "scenario-btn"+(index===currentIndex?" active":"");
+    button.setAttribute("aria-current",index===currentIndex?"step":"false");
+    const icon = document.createElement("span");
+    icon.className = "scenario-icon";
+    icon.textContent = scenario.icon;
+    const copy = document.createElement("span");
+    const title = document.createElement("strong");
+    title.textContent = `${String(index+1).padStart(2,"0")}. ${scenario.title}`;
+    const small = document.createElement("small");
+    small.textContent = result ? (result.correct?"✓ 정답 완료":"↻ 오답 확인") : scenario.category;
+    copy.append(title,small); button.append(icon,copy);
+    button.addEventListener("click",()=>{currentIndex=index;renderAll();});
+    scenarioList.appendChild(button);
+  });
+}
+function renderCase(){
+  const s = scenarios[currentIndex];
+  const saved = answers[s.id];
+  currentAnswered = Boolean(saved);
+  $("caseEyebrow").textContent = `CASE ${String(currentIndex+1).padStart(2,"0")} · ${s.type}`;
+  $("caseTitle").textContent = s.title;
+  $("caseSubtitle").textContent = s.subtitle;
+  $("caseCategory").textContent = s.category;
+  $("readingStatus").textContent = s.status;
+  $("readingLot").textContent = s.lot;
+  $("readingRule").textContent = s.rule;
+  $("situationHeading").textContent = s.heading;
+  $("situationText").textContent = s.situation;
+  $("machineVisual").classList.toggle("alert",s.type==="EQUIPMENT"||s.type==="ABNORMAL");
+  const choices = $("choices");
+  choices.innerHTML = "";
+  const letters = ["A","B","C","D"];
+  s.options.forEach((option,index)=>{
+    const button = document.createElement("button");
+    button.type="button";
+    button.className="choice";
+    button.disabled=currentAnswered;
+    if(saved && option.correct) button.classList.add("correct");
+    if(saved && saved.selectedIndex===index && !option.correct) button.classList.add("wrong");
+    const letter=document.createElement("span");letter.className="letter";letter.textContent=letters[index];
+    const text=document.createElement("span");text.className="choice-text";text.textContent=option.text;
+    button.append(letter,text);
+    button.addEventListener("click",()=>submitAnswer(index));
+    choices.appendChild(button);
+  });
+  const feedback=$("feedback");
+  feedback.className="feedback"+(saved?" show "+(saved.correct?"good":"bad"):"");
+  if(saved){
+    const selected=s.options[saved.selectedIndex];
+    $("feedbackTitle").textContent=saved.correct?"좋습니다. 올바른 판단입니다.":"다시 확인해 보세요.";
+    $("feedbackText").textContent=selected.why;
+    $("feedbackPrinciple").textContent=selected.principle;
+    $("answerStatus").textContent=saved.correct?"정답 · 20점 획득":"오답 · 해설을 확인하고 다시 학습하세요";
+  }else{
+    $("feedbackTitle").textContent="";$("feedbackText").textContent="";$("feedbackPrinciple").textContent="";
+    $("answerStatus").textContent="아직 답변하지 않았습니다.";
+  }
+  $("retryBtn").classList.toggle("hidden",!saved);
+  $("nextBtn").textContent=currentIndex===scenarios.length-1?"첫 시나리오로 돌아가기 ↺":"다음 시나리오 →";
+}
+function submitAnswer(selectedIndex){
+  const s=scenarios[currentIndex];
+  if(answers[s.id]) return;
+  const option=s.options[selectedIndex];
+  answers[s.id]={selectedIndex,correct:option.correct,answeredAt:new Date().toISOString()};
+  saveProgress();
+  renderAll();
+}
+function renderStats(){
+  const count=answeredCount(),score=scoreTotal(),acc=accuracy();
+  $("progressText").textContent=count;
+  $("progressBar").style.width=(count/scenarios.length*100)+"%";
+  $("scoreTop").textContent=score;
+  $("accuracyTop").textContent=acc;
+  $("answeredMetric").textContent=`${count} / ${scenarios.length}`;
+  $("scoreMetric").textContent=score+"점";
+  $("accuracyMetric").textContent=acc;
+  const log=$("historyLog");log.innerHTML="";
+  const records=scenarios.filter(s=>answers[s.id]).reverse();
+  if(!records.length){
+    const empty=document.createElement("div");empty.className="small-muted";empty.textContent="아직 기록이 없습니다. 첫 시나리오에 답해 보세요.";log.appendChild(empty);return;
+  }
+  records.forEach(s=>{
+    const item=answers[s.id];
+    const row=document.createElement("div");row.className="log-item";
+    const icon=document.createElement("span");icon.className="log-icon";icon.textContent=item.correct?"✓":"↻";
+    icon.style.color=item.correct?"var(--good)":"var(--warn)";
+    const copy=document.createElement("div");
+    const strong=document.createElement("strong");strong.textContent=s.title+" · "+(item.correct?"정답":"오답");strong.style.display="block";
+    const small=document.createElement("span");small.textContent=item.correct?"+20점":"해설 확인 필요";small.style.color="var(--muted)";
+    copy.append(strong,small);row.append(icon,copy);log.appendChild(row);
+  });
+}
+function renderAll(){renderScenarioList();renderCase();renderStats();}
+$("nextBtn").addEventListener("click",()=>{currentIndex=(currentIndex+1)%scenarios.length;renderAll();});
+$("retryBtn").addEventListener("click",()=>{
+  const s=scenarios[currentIndex];
+  delete answers[s.id];saveProgress();renderAll();
+});
+$("resetBtn").addEventListener("click",()=>{
+  const ok=window.confirm("저장된 시뮬레이터 학습 기록을 모두 초기화할까요?");
+  if(!ok)return;
+  answers={};currentIndex=0;saveProgress();renderAll();
+});
+loadProgress();
+renderAll();
+</script>
+</body>
+</html>

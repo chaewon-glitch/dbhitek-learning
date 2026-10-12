@@ -1,0 +1,1627 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DB HiTek | Operator Insight</title>
+
+  <style>
+    :root {
+      --primary: #1769e0;
+      --primary-light: #eaf2ff;
+      --bg: #f3f6fb;
+      --surface: #ffffff;
+      --sidebar: #111d32;
+      --text: #19263b;
+      --muted: #718096;
+      --border: #e3e9f2;
+      --success: #139b70;
+      --warning: #e7a128;
+      --danger: #e05252;
+      --shadow: 0 4px 18px rgba(28, 48, 80, 0.05);
+    }
+
+    body.dark {
+      --bg: #0c1422;
+      --surface: #172338;
+      --text: #e7edf7;
+      --muted: #a1b0c6;
+      --border: #2b3a51;
+      --primary-light: #1c3154;
+      --shadow: 0 4px 18px rgba(0, 0, 0, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo",
+                   sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.2s, color 0.2s;
+    }
+
+    button, input, select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* 사이드바 */
+
+    .sidebar {
+      width: 250px;
+      min-width: 250px;
+      background: var(--sidebar);
+      color: #fff;
+      padding: 25px 16px;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s;
+      z-index: 20;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 8px 28px;
+      border-bottom: 1px solid #29364b;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: var(--primary);
+      font-size: 23px;
+      font-weight: bold;
+    }
+
+    .brand-name {
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: 0.2px;
+    }
+
+    .brand-sub {
+      color: #9aabc4;
+      font-size: 10px;
+      margin-top: 5px;
+    }
+
+    .menu-label {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      color: #7f91ac;
+      padding: 26px 12px 10px;
+    }
+
+    .nav-menu {
+      display: grid;
+      gap: 6px;
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 13px 14px;
+      border: 0;
+      border-radius: 9px;
+      background: transparent;
+      color: #b9c5d8;
+      text-align: left;
+      font-size: 13px;
+      transition: 0.2s;
+    }
+
+    .nav-btn:hover {
+      background: #1e304c;
+      color: #fff;
+    }
+
+    .nav-btn.active {
+      color: #fff;
+      background: #1769e0;
+      box-shadow: 0 4px 12px #0b132633;
+    }
+
+    .nav-icon {
+      width: 22px;
+      text-align: center;
+      font-size: 17px;
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding: 16px 10px 0;
+      color: #8fa0b9;
+      font-size: 11px;
+      line-height: 1.8;
+    }
+
+    /* 메인 레이아웃 */
+
+    .main {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .topbar {
+      height: 76px;
+      padding: 0 30px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .icon-btn {
+      width: 39px;
+      height: 39px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      background: var(--surface);
+      font-size: 17px;
+    }
+
+    .icon-btn:hover {
+      background: var(--primary-light);
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 400px;
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0 13px;
+    }
+
+    .search-box input {
+      width: 100%;
+      min-width: 0;
+      height: 40px;
+      border: 0;
+      outline: none;
+      color: var(--text);
+      background: transparent;
+      font-size: 12px;
+    }
+
+    .topbar-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+    }
+
+    .avatar {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: bold;
+    }
+
+    .content {
+      padding: 30px;
+      max-width: 1600px;
+      margin: auto;
+    }
+
+    .page-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+      margin-bottom: 26px;
+    }
+
+    .eyebrow {
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 1.2px;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-size: clamp(23px, 3vw, 31px);
+      letter-spacing: -1px;
+      margin: 0;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+      margin-top: 10px;
+    }
+
+    .button-primary {
+      border: 0;
+      border-radius: 9px;
+      background: var(--primary);
+      color: white;
+      padding: 12px 16px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .button-primary:hover {
+      filter: brightness(1.1);
+    }
+
+    .button-secondary {
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: var(--surface);
+      color: var(--text);
+      padding: 11px 15px;
+      font-size: 12px;
+    }
+
+    /* 대시보드 카드 */
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(120deg, #11213c, #174a8c);
+      color: white;
+      padding: 32px;
+      border-radius: 16px;
+      margin-bottom: 23px;
+    }
+
+    .hero::after {
+      content: "◉";
+      position: absolute;
+      right: 45px;
+      top: 8px;
+      color: #ffffff0c;
+      font-size: 190px;
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .hero-label {
+      color: #8ec8ff;
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+    }
+
+    .hero h2 {
+      position: relative;
+      z-index: 1;
+      font-size: clamp(22px, 3vw, 34px);
+      line-height: 1.45;
+      max-width: 620px;
+      margin: 14px 0 12px;
+    }
+
+    .hero p {
+      position: relative;
+      z-index: 1;
+      color: #c5d6ed;
+      font-size: 13px;
+      line-height: 1.8;
+      max-width: 580px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero .button-secondary {
+      color: white;
+      background: #ffffff10;
+      border-color: #ffffff45;
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin-bottom: 25px;
+    }
+
+    .card {
+      min-width: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      padding: 21px;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .stat-title {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .stat-icon {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      background: var(--primary-light);
+      border-radius: 11px;
+      font-size: 19px;
+    }
+
+    .stat-value {
+      margin-top: 18px;
+      font-size: 27px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+    }
+
+    .stat-note {
+      color: var(--muted);
+      font-size: 10px;
+      margin-top: 8px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 29px 0 15px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: 17px;
+    }
+
+    .section-heading span {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .feature-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .feature-card {
+      text-align: left;
+      color: var(--text);
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--primary);
+    }
+
+    .feature-icon {
+      width: 45px;
+      height: 45px;
+      display: grid;
+      place-items: center;
+      background: var(--primary-light);
+      border-radius: 12px;
+      font-size: 22px;
+      margin-bottom: 17px;
+    }
+
+    .feature-card h3 {
+      font-size: 14px;
+      margin: 0 0 10px;
+    }
+
+    .feature-card p {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.8;
+      margin: 0;
+    }
+
+    .feature-link {
+      display: inline-block;
+      color: var(--primary);
+      font-size: 11px;
+      margin-top: 17px;
+      font-weight: bold;
+    }
+
+    /* 하단 콘텐츠 */
+
+    .bottom-grid {
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    }
+
+    .progress-row {
+      margin: 20px 0;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 12px;
+      margin-bottom: 9px;
+    }
+
+    .progress-info span:last-child {
+      color: var(--muted);
+    }
+
+    .progress-bar {
+      height: 7px;
+      background: var(--bg);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: inherit;
+    }
+
+    .notice {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 15px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .notice:last-child {
+      border-bottom: 0;
+    }
+
+    .notice-icon {
+      font-size: 19px;
+    }
+
+    .notice strong {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .notice p {
+      font-size: 11px;
+      line-height: 1.7;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    /* 메뉴별 동적 화면 */
+
+    .dynamic-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .detail-list {
+      padding-left: 19px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 2.3;
+    }
+
+    .tag {
+      display: inline-block;
+      border-radius: 6px;
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 6px 9px;
+      font-size: 10px;
+      margin: 4px 3px 4px 0;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      min-width: 400px;
+    }
+
+    th, td {
+      padding: 14px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: normal;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 20px;
+      font-size: 10px;
+    }
+
+    .status.ok {
+      color: var(--success);
+      background: #139b7017;
+    }
+
+    .status.warn {
+      color: var(--warning);
+      background: #e7a12819;
+    }
+
+    .quiz-option {
+      display: block;
+      width: 100%;
+      text-align: left;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      padding: 13px;
+      border-radius: 9px;
+      margin: 9px 0;
+      font-size: 12px;
+    }
+
+    .quiz-option:hover {
+      border-color: var(--primary);
+    }
+
+    .quiz-option:disabled {
+      cursor: default;
+      opacity: 0.85;
+    }
+
+    .quiz-result {
+      margin-top: 15px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 15px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    .check-row input {
+      accent-color: var(--primary);
+      width: 17px;
+      height: 17px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 45px 20px;
+      color: var(--muted);
+    }
+
+    .footer {
+      text-align: center;
+      padding: 30px 10px 10px;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.8;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      background: #14243c;
+      color: white;
+      padding: 14px 20px;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      font-size: 12px;
+      z-index: 100;
+      display: none;
+    }
+
+    .toast.show {
+      display: block;
+      animation: fade-in 0.2s ease;
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .mobile-overlay {
+      display: none;
+    }
+
+    .simulator-shell { padding: 12px; }
+    .simulator-note { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: baseline; padding: 10px 12px 14px; font-size: 12px; color: var(--muted); }
+    .simulator-note strong { color: var(--primary); }
+    .simulator-frame { display: block; width: 100%; height: 1500px; border: 1px solid var(--border); border-radius: 12px; background: #0b1220; }
+    @media (max-width: 760px) { .simulator-frame { height: 1900px; } }
+
+    @media (max-width: 1100px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .feature-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .content {
+        padding: 23px;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        transform: translateX(-100%);
+        overflow-y: auto;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .mobile-overlay.open {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: #0008;
+        z-index: 15;
+      }
+
+      .topbar {
+        height: 65px;
+        padding: 0 15px;
+        gap: 10px;
+      }
+
+      .profile .profile-text {
+        display: none;
+      }
+
+      .content {
+        padding: 20px 15px;
+      }
+
+      .hero {
+        padding: 24px 20px;
+      }
+
+      .stats-grid {
+        gap: 10px;
+      }
+
+      .card {
+        padding: 16px;
+      }
+
+      .stat-value {
+        font-size: 22px;
+      }
+
+      .feature-grid,
+      .bottom-grid,
+      .dynamic-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .page-heading {
+        flex-direction: column;
+      }
+
+      .page-heading > button {
+        align-self: flex-start;
+      }
+
+      .search-box {
+        max-width: none;
+      }
+
+      .hero::after {
+        right: 0;
+        font-size: 120px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .search-box input {
+        font-size: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+<div class="app">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-logo">D</div>
+      <div>
+        <div class="brand-name">OPERATOR INSIGHT</div>
+        <div class="brand-sub">SEMICONDUCTOR PLATFORM</div>
+      </div>
+    </div>
+
+    <div class="menu-label">WORKSPACE</div>
+
+    <nav class="nav-menu" id="navMenu">
+      <button class="nav-btn active" data-page="dashboard">
+        <span class="nav-icon">▦</span> 대시보드
+      </button>
+      <button class="nav-btn" data-page="process">
+        <span class="nav-icon">◈</span> 반도체 제조 공정
+      </button>
+      <button class="nav-btn" data-page="operator">
+        <span class="nav-icon">♙</span> 오퍼레이터 직무
+      </button>
+      <button class="nav-btn" data-page="equipment">
+        <span class="nav-icon">⚙</span> 장비 및 자동화
+      </button>
+      <button class="nav-btn" data-page="safety">
+        <span class="nav-icon">⬡</span> 안전 및 품질
+      </button>
+      <button class="nav-btn" data-page="production">
+        <span class="nav-icon">▥</span> 생산 현황
+      </button>
+      <button class="nav-btn" data-page="learning">
+        <span class="nav-icon">▤</span> 직무 학습실
+      </button>
+      <button class="nav-btn" data-page="career">
+        <span class="nav-icon">▣</span> 기업 및 채용
+      </button>
+      <button class="nav-btn" data-page="simulator">
+        <span class="nav-icon">▶</span> 실전 시뮬레이터
+      </button>
+    </nav>
+
+    <div class="sidebar-bottom">
+      DB HiTek Operator Insight<br>
+      Educational Simulation v1.0<br>
+      본 프로젝트는 비공식 교육용 웹사이트입니다.
+    </div>
+  </aside>
+
+  <div class="mobile-overlay" id="mobileOverlay"></div>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="icon-btn" id="menuToggle" aria-label="메뉴 열기">☰</button>
+
+      <div class="search-box">
+        <span>⌕</span>
+        <input type="search" id="searchInput"
+               placeholder="메뉴 또는 콘텐츠 검색...">
+      </div>
+
+      <div class="topbar-right">
+        <button class="icon-btn" id="themeToggle"
+                aria-label="테마 전환">☾</button>
+        <div class="profile">
+          <div class="avatar">OP</div>
+          <div class="profile-text">
+            <strong>Operator</strong><br>
+            <span style="color:var(--muted)">학습 사용자</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content" id="content">
+      <!-- JavaScript가 현재 페이지를 표시합니다. -->
+    </div>
+
+    <footer class="footer">
+      DB HiTek Operator Insight · Educational Project<br>
+      이 사이트는 개인 학습용 시뮬레이션이며 DB하이텍의 공식 홈페이지가 아닙니다.
+      생산 데이터는 가상 데이터입니다.
+    </footer>
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+  const pageInfo = {
+    dashboard: {
+      title: "대시보드",
+      subtitle: "반도체 오퍼레이터 직무와 생산 현황을 한눈에 확인하세요."
+    },
+    process: {
+      title: "반도체 제조 공정",
+      subtitle: "웨이퍼에서 반도체가 만들어지는 주요 공정을 학습합니다."
+    },
+    operator: {
+      title: "오퍼레이터 직무",
+      subtitle: "생산 현장에서 수행하는 주요 업무와 작업 절차를 확인합니다."
+    },
+    equipment: {
+      title: "장비 및 자동화",
+      subtitle: "반도체 장비와 자동화 제어의 기초를 살펴봅니다."
+    },
+    safety: {
+      title: "안전 및 품질",
+      subtitle: "안전한 작업 환경과 품질 관리의 기본 원칙을 확인합니다."
+    },
+    production: {
+      title: "생산 현황",
+      subtitle: "가상 생산 데이터를 활용해 생산 실적을 분석합니다."
+    },
+    learning: {
+      title: "직무 학습실",
+      subtitle: "반도체 기초 지식과 오퍼레이터 직무 퀴즈를 학습합니다."
+    },
+    career: {
+      title: "기업 및 채용",
+      subtitle: "기업 정보와 직무 준비에 필요한 내용을 정리합니다."
+    },
+    simulator: {
+      title: "오퍼레이터 실전 시뮬레이터",
+      subtitle: "가상의 현장 상황에서 안전·품질 판단과 보고 절차를 연습합니다."
+    }
+  };
+
+  let currentPage = "dashboard";
+  let quizAnswered = false;
+  let productionTarget = 1000;
+  let productionActual = 850;
+
+  const content = document.getElementById("content");
+  const sidebar = document.getElementById("sidebar");
+  const overlay = document.getElementById("mobileOverlay");
+  const toast = document.getElementById("toast");
+
+  function showToast(message) {
+    toast.textContent = message;
+    toast.classList.add("show");
+
+    clearTimeout(showToast.timer);
+    showToast.timer = setTimeout(() => {
+      toast.classList.remove("show");
+    }, 2600);
+  }
+
+  function statCard(title, value, icon, note) {
+    return `
+      <div class="card">
+        <div class="stat-top">
+          <span class="stat-title">${title}</span>
+          <span class="stat-icon">${icon}</span>
+        </div>
+        <div class="stat-value">${value}</div>
+        <div class="stat-note">${note}</div>
+      </div>`;
+  }
+
+  function featureCard(icon, title, description, page) {
+    return `
+      <button class="card feature-card" data-go="${page}">
+        <div class="feature-icon">${icon}</div>
+        <h3>${title}</h3>
+        <p>${description}</p>
+        <span class="feature-link">자세히 알아보기 →</span>
+      </button>`;
+  }
+
+  function heading(page) {
+    return `
+      <div class="page-heading">
+        <div>
+          <div class="eyebrow">DB HITEK · OPERATOR INSIGHT</div>
+          <h1>${pageInfo[page].title}</h1>
+          <p class="subtitle">${pageInfo[page].subtitle}</p>
+        </div>
+        ${page !== "dashboard" ?
+          `<button class="button-secondary" data-go="dashboard">← 대시보드</button>` : ""}
+      </div>`;
+  }
+
+  function renderDashboard() {
+    return `
+      ${heading("dashboard")}
+
+      <section class="hero">
+        <div class="hero-label">SEMICONDUCTOR · AUTOMATION · SAFETY</div>
+        <h2>반도체 생산의 중심,<br>오퍼레이터를 이해하다.</h2>
+        <p>
+          반도체 제조 공정부터 장비, 안전, 생산 데이터까지.
+          오퍼레이터의 업무를 이해하고 실습할 수 있는 직무 학습 플랫폼입니다.
+        </p>
+        <div class="hero-actions">
+          <button class="button-primary" data-go="operator">
+            직무 알아보기 →
+          </button>
+          <button class="button-secondary" data-go="process">
+            공정 학습하기
+          </button>
+        </div>
+      </section>
+
+      <div class="grid stats-grid">
+        ${statCard("가상 생산 목표", productionTarget.toLocaleString() + "장", "▥", "교육용 목표 데이터")}
+        ${statCard("가상 생산 실적", productionActual.toLocaleString() + "장", "◉", "교육용 실적 데이터")}
+        ${statCard("목표 달성률", (productionActual / productionTarget * 100).toFixed(1) + "%", "↗", "실적 ÷ 목표 × 100")}
+        ${statCard("직무 학습 메뉴", "8개", "▤", "공정·장비·안전·학습")}
+      </div>
+
+      <div class="section-heading">
+        <h2>주요 학습 메뉴</h2>
+        <span>QUICK ACCESS</span>
+      </div>
+
+      <div class="grid feature-grid">
+        ${featureCard("◈", "반도체 제조 공정", "웨이퍼 제조의 주요 단계와 공정별 역할을 알아봅니다.", "process")}
+        ${featureCard("♙", "오퍼레이터 직무", "생산 업무, 작업 기록, 이상 보고 및 인수인계를 학습합니다.", "operator")}
+        ${featureCard("⚙", "장비 및 자동화", "웨이퍼 이송 장비, 센서와 PLC의 기초를 확인합니다.", "equipment")}
+        ${featureCard("⬡", "안전 및 품질", "작업 안전, 오염 방지, 점검표를 확인합니다.", "safety")}
+        ${featureCard("▥", "생산 현황", "가상 생산량과 목표 달성률을 분석합니다.", "production")}
+        ${featureCard("▤", "직무 학습실", "반도체 기초 용어와 직무 퀴즈를 풀어봅니다.", "learning")}
+        ${featureCard("▶", "실전 시뮬레이터", "장비 알람, 웨이퍼 이상, 보호구, 교대 인수인계 상황을 연습합니다.", "simulator")}
+      </div>
+
+      <div class="grid bottom-grid">
+        <section>
+          <div class="section-heading">
+            <h2>학습 진행 안내</h2>
+            <span>LEARNING GUIDE</span>
+          </div>
+          <div class="card">
+            <div class="progress-row">
+              <div class="progress-info">
+                <span>반도체 제조 공정</span><span>기초 학습</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width:30%"></div>
+              </div>
+            </div>
+            <div class="progress-row">
+              <div class="progress-info">
+                <span>오퍼레이터 직무 이해</span><span>기초 학습</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width:50%"></div>
+              </div>
+            </div>
+            <div class="progress-row">
+              <div class="progress-info">
+                <span>안전 및 품질</span><span>기초 학습</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width:20%"></div>
+              </div>
+            </div>
+            <p class="stat-note">※ 현재 진행률은 디자인 예시입니다.</p>
+          </div>
+        </section>
+
+        <section>
+          <div class="section-heading">
+            <h2>작업 전 핵심 확인</h2>
+            <span>SAFETY</span>
+          </div>
+          <div class="card">
+            <div class="notice">
+              <span class="notice-icon">🛡️</span>
+              <div>
+                <strong>보호구 및 클린룸 복장</strong>
+                <p>사업장 규정에 맞는 복장과 보호구를 착용합니다.</p>
+              </div>
+            </div>
+            <div class="notice">
+              <span class="notice-icon">⚙️</span>
+              <div>
+                <strong>작업 표준 확인</strong>
+                <p>승인된 작업 절차와 장비별 지침을 준수합니다.</p>
+              </div>
+            </div>
+            <div class="notice">
+              <span class="notice-icon">📢</span>
+              <div>
+                <strong>이상 발생 시 보고</strong>
+                <p>임의로 조치하지 말고 정해진 보고 절차를 따릅니다.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>`;
+  }
+
+  function renderProcess() {
+    const processes = [
+      ["01", "산화", "웨이퍼 표면에 산화막을 형성하는 공정입니다."],
+      ["02", "포토", "감광막과 노광·현상 과정을 통해 패턴을 형성합니다."],
+      ["03", "식각", "불필요한 박막이나 재료를 선택적으로 제거합니다."],
+      ["04", "증착", "필요한 물질의 얇은 막을 웨이퍼에 형성합니다."],
+      ["05", "확산·이온 주입", "불순물 도핑을 통해 전기적 특성을 조절합니다."],
+      ["06", "금속 배선", "소자 사이의 전기적 연결을 형성합니다."],
+      ["07", "검사·계측", "공정 결과와 웨이퍼 상태를 측정하고 검사합니다."]
+    ];
+
+    return `${heading("process")}
+      <div class="grid dynamic-grid">
+        ${processes.map(p => `
+          <article class="card">
+            <span class="tag">PROCESS ${p[0]}</span>
+            <h3>${p[1]}</h3>
+            <p class="subtitle">${p[2]}</p>
+            <button class="button-secondary" data-process="${p[0]}">
+              공정 설명 보기
+            </button>
+          </article>`).join("")}
+      </div>
+      <p class="subtitle">※ 실제 공정 순서와 구성은 제품 및 제조 공정에 따라 달라질 수 있습니다.</p>`;
+  }
+
+  function renderOperator() {
+    return `${heading("operator")}
+      <div class="grid dynamic-grid">
+        <article class="card">
+          <h3>주요 업무</h3>
+          <ul class="detail-list">
+            <li>작업 지시 및 생산 조건 확인</li>
+            <li>장비 상태와 생산 진행 상황 확인</li>
+            <li>작업 결과 및 생산 실적 기록</li>
+            <li>이상 발생 시 정해진 절차로 보고</li>
+            <li>교대 근무 인수인계 내용 확인</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>필요 역량</h3>
+          <span class="tag">안전 의식</span>
+          <span class="tag">꼼꼼함</span>
+          <span class="tag">장비 이해</span>
+          <span class="tag">보고 및 소통</span>
+          <span class="tag">작업 표준 준수</span>
+          <span class="tag">이상 징후 관찰</span>
+          <p class="subtitle">
+            오퍼레이터의 실제 담당 업무는 공정, 장비, 사업장 운영 방식에 따라 다를 수 있습니다.
+          </p>
+        </article>
+        <article class="card">
+          <h3>작업 전 확인 사항</h3>
+          <div id="operatorChecklist">
+            ${checkRow("작업 지시와 작업 조건 확인")}
+            ${checkRow("필수 보호구 및 복장 확인")}
+            ${checkRow("장비 상태와 작업 공간 확인")}
+            ${checkRow("이상 발생 시 보고 절차 확인")}
+          </div>
+          <p class="subtitle" id="checkProgress">0 / 4개 항목 완료</p>
+        </article>
+        <article class="card">
+          <h3>이상 상황 대응 원칙</h3>
+          <ol class="detail-list">
+            <li>이상 징후를 발견합니다.</li>
+            <li>현장 안전 절차에 따릅니다.</li>
+            <li>정해진 담당자에게 보고합니다.</li>
+            <li>승인된 절차에 따라 후속 조치를 합니다.</li>
+          </ol>
+        </article>
+      </div>`;
+  }
+
+  function checkRow(label) {
+    return `<label class="check-row">
+      <input type="checkbox" class="task-check">
+      <span>${label}</span>
+    </label>`;
+  }
+
+  function renderEquipment() {
+    const items = [
+      ["웨이퍼 이송 로봇", "웨이퍼 캐리어와 장비 사이에서 웨이퍼를 자동 이송합니다."],
+      ["FOUP", "웨이퍼를 담아 운반하고 오염을 줄이는 용기입니다."],
+      ["센서", "위치, 유무, 온도 등 장비 상태를 감지하는 데 사용됩니다."],
+      ["인터록", "정해진 안전 조건이 충족되지 않을 때 동작을 제한하는 기능입니다."],
+      ["PLC", "프로그램에 따라 자동화 설비의 입출력과 제어를 수행합니다."]
+    ];
+
+    return `${heading("equipment")}
+      <div class="grid dynamic-grid">
+        ${items.map((item, i) => `
+          <article class="card">
+            <div class="feature-icon">${["⚙","▣","◉","⬡","⌘"][i]}</div>
+            <h3>${item[0]}</h3>
+            <p class="subtitle">${item[1]}</p>
+            <button class="button-secondary" data-equipment="${i}">
+              상세 정보
+            </button>
+          </article>`).join("")}
+      </div>`;
+  }
+
+  function renderSafety() {
+    return `${heading("safety")}
+      <div class="grid dynamic-grid">
+        <article class="card">
+          <h3>안전 관리 기본 원칙</h3>
+          <ul class="detail-list">
+            <li>사업장 안전 교육과 출입 규정을 준수합니다.</li>
+            <li>필수 보호구와 클린룸 복장을 확인합니다.</li>
+            <li>승인되지 않은 장비 조작을 하지 않습니다.</li>
+            <li>이상 발생 시 현장 절차에 따라 보고합니다.</li>
+            <li>화학물질은 해당 물질의 안전 지침을 따릅니다.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>작업 안전 체크리스트</h3>
+          <div id="safetyChecklist">
+            ${checkRow("작업 전 안전 지침 확인")}
+            ${checkRow("복장과 보호구 확인")}
+            ${checkRow("작업 구역의 위험 요소 확인")}
+            ${checkRow("비상 연락 및 보고 절차 확인")}
+            ${checkRow("작업 종료 후 지정된 정리 절차 확인")}
+          </div>
+          <p class="subtitle" id="safetyProgress">0 / 5개 항목 완료</p>
+        </article>
+        <article class="card">
+          <h3>품질 관리 핵심</h3>
+          <ul class="detail-list">
+            <li>작업 조건과 표준을 준수합니다.</li>
+            <li>웨이퍼 오염과 물리적 손상을 방지합니다.</li>
+            <li>정확한 생산 기록을 유지합니다.</li>
+            <li>이상 징후를 발견하면 보고합니다.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>주의 사항</h3>
+          <p class="subtitle">
+            실제 작업에서는 이 안내문만으로 판단하지 말고,
+            해당 사업장의 공식 안전 교육과 장비별 작업 표준을 따라야 합니다.
+          </p>
+        </article>
+      </div>`;
+  }
+
+  function renderProduction() {
+    const rate = productionTarget > 0
+      ? productionActual / productionTarget * 100 : 0;
+
+    return `${heading("production")}
+      <div class="grid stats-grid">
+        ${statCard("생산 목표", productionTarget.toLocaleString() + "장", "▥", "사용자가 설정한 목표")}
+        ${statCard("생산 실적", productionActual.toLocaleString() + "장", "◉", "사용자가 설정한 실적")}
+        ${statCard("목표 달성률", rate.toFixed(1) + "%", "↗", "실적 ÷ 목표 × 100")}
+        ${statCard("잔여 목표량", Math.max(0, productionTarget - productionActual).toLocaleString() + "장", "⌛", "목표에서 실적을 뺀 값")}
+      </div>
+
+      <div class="grid dynamic-grid">
+        <section class="card">
+          <h3>생산 데이터 설정</h3>
+          <form id="productionForm">
+            <label class="check-row">
+              <span style="width:100px">생산 목표량</span>
+              <input id="targetInput" type="number" min="1" max="100000000"
+                     required value="${productionTarget}"
+                     style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)">
+            </label>
+            <label class="check-row">
+              <span style="width:100px">생산 실적</span>
+              <input id="actualInput" type="number" min="0" max="100000000"
+                     required value="${productionActual}"
+                     style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)">
+            </label>
+            <button class="button-primary" type="submit">데이터 업데이트</button>
+          </form>
+        </section>
+        <section class="card">
+          <h3>목표 대비 생산 현황</h3>
+          <div class="progress-row">
+            <div class="progress-info">
+              <span>목표 달성률</span><strong>${rate.toFixed(1)}%</strong>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width:${Math.min(100, rate)}%"></div>
+            </div>
+          </div>
+          <p class="subtitle">
+            ${rate >= 100
+              ? "설정한 생산 목표를 달성했습니다."
+              : "목표 달성까지 " + (productionTarget - productionActual).toLocaleString() + "장이 남았습니다."}
+          </p>
+          <p class="stat-note">교육용 가상 데이터 · 실제 생산 설비와 연결되지 않음</p>
+        </section>
+      </div>`;
+  }
+
+  function renderLearning() {
+    return `${heading("learning")}
+      <div class="grid dynamic-grid">
+        <article class="card">
+          <span class="tag">BASIC KNOWLEDGE</span>
+          <h3>오늘의 반도체 용어</h3>
+          <p><strong>웨이퍼(Wafer)</strong></p>
+          <p class="subtitle">
+            반도체 집적회로를 제작하기 위한 얇은 원판 형태의 기판입니다.
+          </p>
+          <hr style="border:0;border-top:1px solid var(--border);margin:20px 0">
+          <p><strong>파운드리(Foundry)</strong></p>
+          <p class="subtitle">
+            다른 기업이 설계한 반도체를 위탁받아 제조하는 사업입니다.
+          </p>
+          <hr style="border:0;border-top:1px solid var(--border);margin:20px 0">
+          <p><strong>수율(Yield)</strong></p>
+          <p class="subtitle">
+            전체 생산 결과 중 기준을 만족하는 양품의 비율을 뜻합니다.
+          </p>
+        </article>
+        <article class="card">
+          <span class="tag">BASIC QUIZ</span>
+          <h3>직무 기초 퀴즈</h3>
+          <p class="subtitle">
+            장비에서 이상 징후를 발견했을 때 가장 적절한 행동은 무엇일까요?
+          </p>
+          <div id="quizOptions">
+            <button class="quiz-option" data-answer="wrong">
+              ① 원인을 확인하기 위해 임의로 장비를 분해한다.
+            </button>
+            <button class="quiz-option" data-answer="correct">
+              ② 정해진 안전 절차를 따르고 담당자에게 보고한다.
+            </button>
+            <button class="quiz-option" data-answer="wrong">
+              ③ 생산이 끝날 때까지 이상을 기록하지 않는다.
+            </button>
+            <button class="quiz-option" data-answer="wrong">
+              ④ 작업 지침과 관계없이 설정을 변경한다.
+            </button>
+          </div>
+          <div class="quiz-result" id="quizResult" aria-live="polite"></div>
+          <button class="button-secondary" id="resetQuiz">다시 풀기</button>
+        </article>
+      </div>`;
+  }
+
+  function renderSimulator() {
+    return `${heading("simulator")}
+      <section class="card simulator-shell">
+        <div class="simulator-note">
+          <strong>교육용 가상 훈련</strong>
+          <span>아래 화면에서 시나리오를 선택해 실습하세요. 실제 작업은 반드시 사업장 공식 SOP와 담당자 지시를 따르세요.</span>
+        </div>
+        <iframe class="simulator-frame" src="SIM.html" title="오퍼레이터 실전 시뮬레이터" loading="lazy" allow="fullscreen"></iframe>
+      </section>`;
+  }
+
+  function renderCareer() {
+    return `${heading("career")}
+      <div class="grid dynamic-grid">
+        <article class="card">
+          <div class="feature-icon">▣</div>
+          <h3>DB하이텍 기업 정보</h3>
+          <p class="subtitle">
+            DB하이텍은 반도체 파운드리 사업을 영위하는 기업입니다.
+            기업의 최신 사업 정보와 채용 공고는 공식 채널에서 확인하세요.
+          </p>
+          <button class="button-primary" id="companyLink">
+            공식 홈페이지 열기 ↗
+          </button>
+        </article>
+        <article class="card">
+          <div class="feature-icon">♙</div>
+          <h3>오퍼레이터 직무 준비</h3>
+          <ul class="detail-list">
+            <li>반도체 제조 공정 기초 이해</li>
+            <li>안전 규정과 작업 표준 준수</li>
+            <li>자동화 설비의 기초 이해</li>
+            <li>정확한 기록과 원활한 의사소통</li>
+            <li>교대 근무 및 현장 업무 이해</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>관련 학습 분야</h3>
+          <span class="tag">생산자동화</span>
+          <span class="tag">반도체 제조</span>
+          <span class="tag">전기·전자 기초</span>
+          <span class="tag">PLC</span>
+          <span class="tag">산업안전</span>
+          <p class="subtitle">
+            자격증의 실제 채용 우대 여부는 지원 시점의 공식 채용 공고를 기준으로 확인합니다.
+          </p>
+        </article>
+        <article class="card">
+          <h3>프로젝트 안내</h3>
+          <p class="subtitle">
+            이 홈페이지는 오퍼레이터 직무 학습을 위한 개인 교육용 프로젝트입니다.
+            DB하이텍의 공식 서비스나 채용 시스템이 아니며,
+            실제 내부 생산 데이터를 제공하지 않습니다.
+          </p>
+        </article>
+      </div>`;
+  }
+
+  function renderPage(page) {
+    currentPage = page;
+    const info = pageInfo[page] || pageInfo.dashboard;
+
+    document.title = info.title + " | Operator Insight";
+
+    document.querySelectorAll(".nav-btn").forEach(btn => {
+      const active = btn.dataset.page === page;
+      btn.classList.toggle("active", active);
+      if (active) {
+        btn.setAttribute("aria-current", "page");
+      } else {
+        btn.removeAttribute("aria-current");
+      }
+    });
+
+    const renderers = {
+      dashboard: renderDashboard,
+      process: renderProcess,
+      operator: renderOperator,
+      equipment: renderEquipment,
+      safety: renderSafety,
+      production: renderProduction,
+      learning: renderLearning,
+      career: renderCareer,
+      simulator: renderSimulator
+    };
+
+    content.innerHTML = (renderers[page] || renderDashboard)();
+    content.scrollIntoView({ behavior: "auto", block: "start" });
+
+    sidebar.classList.remove("open");
+    overlay.classList.remove("open");
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  /* 메뉴 이동 및 버튼 기능 */
+
+  document.getElementById("navMenu").addEventListener("click", event => {
+    const button = event.target.closest("[data-page]");
+    if (button) renderPage(button.dataset.page);
+  });
+
+  content.addEventListener("click", event => {
+    const goButton = event.target.closest("[data-go]");
+    if (goButton) {
+      renderPage(goButton.dataset.go);
+      return;
+    }
+
+    const processButton = event.target.closest("[data-process]");
+    if (processButton) {
+      const names = {
+        "01": "산화",
+        "02": "포토",
+        "03": "식각",
+        "04": "증착",
+        "05": "확산·이온 주입",
+        "06": "금속 배선",
+        "07": "검사·계측"
+      };
+
+      showToast(names[processButton.dataset.process] +
+                " 공정의 상세 학습 콘텐츠를 선택했습니다.");
+      return;
+    }
+
+    const equipmentButton = event.target.closest("[data-equipment]");
+    if (equipmentButton) {
+      const descriptions = [
+        "웨이퍼를 정해진 경로로 이송하는 자동화 장치입니다.",
+        "웨이퍼를 보호하고 운반하기 위한 캐리어입니다.",
+        "물체의 유무나 위치 등 필요한 신호를 감지합니다.",
+        "안전 조건이 충족되지 않으면 동작을 제한하는 기능입니다.",
+        "프로그램에 따라 설비의 제어 신호를 처리하는 장치입니다."
+      ];
+      showToast(descriptions[Number(equipmentButton.dataset.equipment)]);
+      return;
+    }
+
+    const answerButton = event.target.closest("[data-answer]");
+    if (answerButton && !quizAnswered) {
+      quizAnswered = true;
+      const correct = answerButton.dataset.answer === "correct";
+      const result = document.getElementById("quizResult");
+
+      result.textContent = correct
+        ? "정답입니다! 안전 절차와 보고 체계를 따르는 것이 중요합니다."
+        : "다시 생각해 보세요. 안전 절차를 준수하고 담당자에게 보고해야 합니다.";
+
+      result.style.color = correct ? "var(--success)" : "var(--danger)";
+
+      document.querySelectorAll("[data-answer]").forEach(button => {
+        button.disabled = true;
+      });
+      return;
+    }
+  });
+
+  /* 체크리스트 */
+
+  content.addEventListener("change", event => {
+    if (!event.target.matches(".task-check")) return;
+
+    const checklist = event.target.closest(".card");
+    const checks = checklist.querySelectorAll(".task-check");
+    const checked = checklist.querySelectorAll(".task-check:checked").length;
+
+    const progress = checklist.querySelector(".subtitle[id$='Progress']");
+    if (progress) {
+      progress.textContent = `${checked} / ${checks.length}개 항목 완료`;
+    }
+
+    showToast("점검 항목을 업데이트했습니다.");
+  });
+
+  /* 생산량 입력 및 계산 */
+
+  content.addEventListener("submit", event => {
+    if (event.target.id !== "productionForm") return;
+
+    event.preventDefault();
+
+    const target = Number(document.getElementById("targetInput").value);
+    const actual = Number(document.getElementById("actualInput").value);
+
+    if (!Number.isSafeInteger(target) ||
+        !Number.isSafeInteger(actual) ||
+        target < 1 || actual < 0 ||
+        target > 100000000 || actual > 100000000) {
+      showToast("목표량과 실적을 올바르게 입력해 주세요.");
+      return;
+    }
+
+    productionTarget = target;
+    productionActual = actual;
+
+    renderPage("production");
+    showToast("가상 생산 데이터가 업데이트되었습니다.");
+  });
+
+  /* 퀴즈 초기화 */
+
+  content.addEventListener("click", event => {
+    if (event.target.id === "resetQuiz") {
+      quizAnswered = false;
+      renderPage("learning");
+      showToast("퀴즈가 초기화되었습니다.");
+    }
+  });
+
+  /* 공식 홈페이지 연결 */
+
+  content.addEventListener("click", event => {
+    if (event.target.closest("#companyLink")) {
+      window.open("https://www.dbhitek.com/", "_blank", "noopener,noreferrer");
+    }
+  });
+
+  /* 다크 모드 */
+
+  document.getElementById("themeToggle").addEventListener("click", () => {
+    document.body.classList.toggle("dark");
+
+    const dark = document.body.classList.contains("dark");
+    document.getElementById("themeToggle").textContent = dark ? "☀" : "☾";
+
+    showToast(dark ? "다크 모드가 적용되었습니다." : "라이트 모드가 적용되었습니다.");
+  });
+
+  /* 모바일 메뉴 */
+
+  document.getElementById("menuToggle").addEventListener("click", () => {
+    sidebar.classList.toggle("open");
+    overlay.classList.toggle("open");
+  });
+
+  overlay.addEventListener("click", () => {
+    sidebar.classList.remove("open");
+    overlay.classList.remove("open");
+  });
+
+  /* 검색 */
+
+  document.getElementById("searchInput").addEventListener("keydown", event => {
+    if (event.key !== "Enter") return;
+
+    const query = event.target.value.trim().toLowerCase();
+
+    if (!query) {
+      showToast("검색어를 입력해 주세요.");
+      return;
+    }
+
+    const searchable = [
+      ["dashboard", "대시보드 메인 홈 생산 현황"],
+      ["process", "반도체 제조 공정 웨이퍼 산화 포토 식각 증착 검사"],
+      ["operator", "오퍼레이터 직무 생산 업무 인수인계"],
+      ["equipment", "장비 자동화 센서 로봇 foup plc"],
+      ["safety", "안전 품질 보호구 점검"],
+      ["production", "생산 현황 실적 목표 달성률"],
+      ["learning", "직무 학습실 퀴즈 용어 사전"],
+      ["career", "기업 채용 자격증 직무 준비"],
+      ["simulator", "실전 시뮬레이터 장비 알람 웨이퍼 이상 보호구 인수인계 훈련"]
+    ];
+
+    const match = searchable.find(item =>
+      item[1].toLowerCase().includes(query)
+    );
+
+    if (match) {
+      renderPage(match[0]);
+      showToast("검색 결과: " + pageInfo[match[0]].title);
+    } else {
+      showToast("일치하는 메뉴를 찾지 못했습니다.");
+    }
+  });
+
+  /* 초기 화면 */
+
+  renderPage("dashboard");
+</script>
+</body>
+</html>
